@@ -4,6 +4,10 @@ A multi-mode morphing biquad filter audio plugin built with JUCE, based on the A
 
 ![Z-Filter GUI](GUI/Screenshot.png)
 
+## Download
+
+**[Z-Filter.vst3 (Windows x64)](Releases/Z-Filter.vst3/Contents/x86_64-win/Z-Filter.vst3)** — Drop into your VST3 folder (typically `C:\Program Files\Common Files\VST3\`) and scan in your DAW.
+
 ## Features
 
 - **5 Filter Types**: Lowpass, Highpass, Bandpass, Notch, Region Gate
