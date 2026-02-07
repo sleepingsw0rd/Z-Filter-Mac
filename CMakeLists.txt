@@ -17,7 +17,7 @@ FetchContent_MakeAvailable(JUCE)
 
 # Define the plugin target
 juce_add_plugin(ZFilter
-    COMPANY_NAME           "Z-Filter"
+    COMPANY_NAME           "SleepingSword"
     IS_SYNTH               FALSE
     NEEDS_MIDI_INPUT        FALSE
     NEEDS_MIDI_OUTPUT       FALSE
