@@ -79,6 +79,8 @@ juce::AudioProcessorValueTreeState::ParameterLayout ZFilterProcessor::createPara
     params.push_back(std::make_unique<juce::AudioParameterFloat>(
         juce::ParameterID("morphLfoDepth", 2), "Morph LFO Depth",
         juce::NormalisableRange<float>(0.0f, 1.0f, 0.001f), 0.0f));
+    params.push_back(std::make_unique<juce::AudioParameterBool>(
+        juce::ParameterID("morphLfoSync", 2), "Morph LFO Sync", false));
 
     // Master
     params.push_back(std::make_unique<juce::AudioParameterFloat>(
@@ -182,6 +184,7 @@ void ZFilterProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::Midi
     const float morphParam = *apvts.getRawParameterValue("morph");
     const float morphLfoSpeedParam = *apvts.getRawParameterValue("morphLfoSpeed");
     const float morphLfoDepthParam = *apvts.getRawParameterValue("morphLfoDepth");
+    const bool morphLfoSyncEnabled = *apvts.getRawParameterValue("morphLfoSync") > 0.5f;
     const bool bypassed = *apvts.getRawParameterValue("bypass") > 0.5f;
     const float mixParam = *apvts.getRawParameterValue("mix");
     const float B = *apvts.getRawParameterValue("frequency");
@@ -432,8 +435,8 @@ void ZFilterProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::Midi
     double lfoBFreqHz = computeLfoFreq(lfoBActualSpeed, lfoBActualSync);
     double lfoBPhaseInc = lfoBFreqHz / sr;
 
-    // Morph LFO frequency (always free-running, no sync)
-    double morphLfoFreqHz = 0.01 * pow(2000.0, (double)morphLfoSpeedParam);
+    // Morph LFO frequency (supports sync)
+    double morphLfoFreqHz = computeLfoFreq(morphLfoSpeedParam, morphLfoSyncEnabled);
     double morphLfoPhaseInc = morphLfoFreqHz / sr;
 
     // Helper: compute per-sample coefficients for a given filter type at a given frequency

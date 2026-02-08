@@ -277,6 +277,8 @@ private:
     KnobComponent morphKnob { KnobComponent::Small };
     KnobComponent morphLfoSpeedKnob { KnobComponent::Small };
     KnobComponent morphLfoDepthKnob { KnobComponent::Small };
+    RoundButtonComponent morphLfoSyncBtn;
+    LEDComponent morphLfoSyncLED;
 
     // Master section
     KnobComponent inputKnob  { KnobComponent::Small };
