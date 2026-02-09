@@ -1,19 +1,27 @@
-# Z-Filter XL
+# Z-Filter XL (macOS)
 
-A dual-filter morphing biquad audio plugin with expanded UI, built with JUCE. Based on the Airwindows Z-series filters by Chris Johnson.
+A dual-filter morphing biquad audio plugin with expanded UI, built with JUCE. Based on the Airwindows Z-series filters by Chris Johnson. **Mac (Apple Silicon + Intel) universal binary builds** — VST3 and AudioUnit.
+
+> For the Windows version, see [Z-Filter XL (Windows)](https://github.com/sleepingsw0rd/Z-Filter/tree/v2-xl).
 
 ![Z-Filter XL GUI](GUI/Screenshot-XL.png)
 
-## All Versions
+## All Versions (macOS)
 
 | Z-Filter Mini | Z-Filter | Z-Filter XL |
 |:---:|:---:|:---:|
 | ![Mini](GUI/screenshot-mini.png) | ![Main](GUI/Screenshot-main.png) | ![XL](GUI/Screenshot-XL.png) |
 | Single filter, no LFO, minimal UI | Single filter, single LFO, compact UI | Dual filter, dual LFO, morph, expanded UI |
-| **[Download VST3](https://github.com/sleepingsw0rd/Z-Filter/raw/mini/Releases/Z-FilterMini.vst3/Contents/x86_64-win/Z-FilterMini.vst3)** | **[Download VST3](https://github.com/sleepingsw0rd/Z-Filter/raw/main/Releases/Z-Filter.vst3/Contents/x86_64-win/Z-Filter.vst3)** | **[Download VST3](https://github.com/sleepingsw0rd/Z-Filter/raw/v2-xl/Releases/Z-FilterXL.vst3/Contents/x86_64-win/Z-FilterXL.vst3)** |
-| [Documentation](https://github.com/sleepingsw0rd/Z-Filter/tree/mini#readme) | [Documentation](https://github.com/sleepingsw0rd/Z-Filter/tree/main#readme) | *You are here* |
+| **[Download VST3](https://github.com/sleepingsw0rd/Z-Filter-Mac/raw/mini/Releases/Z-FilterMini-Mac-VST3.zip)** | **[Download VST3](https://github.com/sleepingsw0rd/Z-Filter-Mac/raw/main/Releases/Z-Filter-Mac-VST3.zip)** | **[Download VST3](https://github.com/sleepingsw0rd/Z-Filter-Mac/raw/v2-xl/Releases/Z-FilterXL-Mac-VST3.zip)** |
+| **[Download AU](https://github.com/sleepingsw0rd/Z-Filter-Mac/raw/mini/Releases/Z-FilterMini-Mac-AU.zip)** | **[Download AU](https://github.com/sleepingsw0rd/Z-Filter-Mac/raw/main/Releases/Z-Filter-Mac-AU.zip)** | **[Download AU](https://github.com/sleepingsw0rd/Z-Filter-Mac/raw/v2-xl/Releases/Z-FilterXL-Mac-AU.zip)** |
+| [Documentation](https://github.com/sleepingsw0rd/Z-Filter-Mac/tree/mini#readme) | [Documentation](https://github.com/sleepingsw0rd/Z-Filter-Mac/tree/main#readme) | *You are here* |
 
-Drop into your VST3 folder (typically `C:\Program Files\Common Files\VST3\`) and scan in your DAW. All three versions can run side-by-side.
+### Installation
+
+- **VST3**: Unzip and copy `Z-FilterXL.vst3` to `~/Library/Audio/Plug-Ins/VST3/`
+- **AU**: Unzip and copy `Z-FilterXL.component` to `~/Library/Audio/Plug-Ins/Components/`
+
+Rescan in your DAW. All three versions can run side-by-side.
 
 ## Features
 
@@ -74,21 +82,27 @@ Drop into your VST3 folder (typically `C:\Program Files\Common Files\VST3\`) and
 
 ### Requirements
 
-- CMake 3.22+
-- C++17 compatible compiler (MSVC, GCC, Clang)
-- JUCE 7.0.12 (fetched automatically via CMake)
+- macOS 11.0+ (Big Sur or later)
+- Xcode 12.4+ with Command Line Tools (`xcode-select --install`)
+- CMake 3.22+ (`brew install cmake`)
+- JUCE 8.0.12 (fetched automatically via CMake)
 
 ### Build Steps
 
 ```bash
-cmake -B build -S .
+cmake -B build -G Xcode
 cmake --build build --config Release
 ```
+
+Builds universal binaries (arm64 + x86_64) by default.
 
 Build artifacts:
 
 - **VST3**: `build/ZFilter_artefacts/Release/VST3/Z-FilterXL.vst3`
-- **Standalone**: `build/ZFilter_artefacts/Release/Standalone/Z-FilterXL.exe`
+- **AU**: `build/ZFilter_artefacts/Release/AU/Z-FilterXL.component`
+- **Standalone**: `build/ZFilter_artefacts/Release/Standalone/Z-FilterXL.app`
+
+With `COPY_PLUGIN_AFTER_BUILD` enabled, plugins are automatically installed to `~/Library/Audio/Plug-Ins/`.
 
 ## DSP Signal Flow
 
@@ -106,7 +120,7 @@ Build artifacts:
 ## Credits
 
 - **Filter algorithms**: Based on [Airwindows](https://www.airwindows.com/) ZLowpass2, ZHighpass2, ZBandpass2, ZNotch2 by Chris Johnson (MIT License)
-- **Framework**: [JUCE](https://juce.com/) 7.0.12
+- **Framework**: [JUCE](https://juce.com/) 8.0.12
 
 ## License
 
