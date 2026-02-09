@@ -4,13 +4,14 @@ A streamlined single-knob filter plugin built with JUCE, based on the Airwindows
 
 ![Z-Filter Mini GUI](GUI/screenshot-mini.png)
 
-## Download
+## All Versions
 
-| Version | Description | Download |
-|---------|-------------|----------|
-| **Z-Filter Mini** | Single filter, no LFO, minimal UI | **[Z-FilterMini.vst3 (Win x64)](https://github.com/sleepingsw0rd/Z-Filter/raw/mini/Releases/Z-FilterMini.vst3/Contents/x86_64-win/Z-FilterMini.vst3)** |
-| **Z-Filter** | Single filter, single LFO, compact UI | **[Z-Filter.vst3 (Win x64)](https://github.com/sleepingsw0rd/Z-Filter/raw/main/Releases/Z-Filter.vst3/Contents/x86_64-win/Z-Filter.vst3)** |
-| **Z-Filter XL** | Dual filter, dual LFO, morph with LFO, expanded UI | **[Z-FilterXL.vst3 (Win x64)](https://github.com/sleepingsw0rd/Z-Filter/raw/v2-xl/Releases/Z-FilterXL.vst3/Contents/x86_64-win/Z-FilterXL.vst3)** |
+| Z-Filter Mini | Z-Filter | Z-Filter XL |
+|:---:|:---:|:---:|
+| ![Mini](GUI/screenshot-mini.png) | ![Main](GUI/Screenshot-main.png) | ![XL](GUI/Screenshot-XL.png) |
+| Single filter, no LFO, minimal UI | Single filter, single LFO, compact UI | Dual filter, dual LFO, morph, expanded UI |
+| **[Download VST3](https://github.com/sleepingsw0rd/Z-Filter/raw/mini/Releases/Z-FilterMini.vst3/Contents/x86_64-win/Z-FilterMini.vst3)** | **[Download VST3](https://github.com/sleepingsw0rd/Z-Filter/raw/main/Releases/Z-Filter.vst3/Contents/x86_64-win/Z-Filter.vst3)** | **[Download VST3](https://github.com/sleepingsw0rd/Z-Filter/raw/v2-xl/Releases/Z-FilterXL.vst3/Contents/x86_64-win/Z-FilterXL.vst3)** |
+| *You are here* | [Documentation](https://github.com/sleepingsw0rd/Z-Filter/tree/main#readme) | [Documentation](https://github.com/sleepingsw0rd/Z-Filter/tree/v2-xl#readme) |
 
 Drop into your VST3 folder (typically `C:\Program Files\Common Files\VST3\`) and scan in your DAW. All three versions can run side-by-side.
 
