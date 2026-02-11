@@ -307,12 +307,14 @@ ZFilterMiniEditor::ZFilterMiniEditor(ZFilterMiniProcessor& p)
     addAndMakeVisible(hpBtn);
     addAndMakeVisible(bpBtn);
     addAndMakeVisible(ntBtn);
+    addAndMakeVisible(freqSmoothBtn);
 
     // LEDs
     addAndMakeVisible(lpLED);
     addAndMakeVisible(hpLED);
     addAndMakeVisible(bpLED);
     addAndMakeVisible(ntLED);
+    addAndMakeVisible(freqSmoothLED);
 
     // Filter type button callbacks (4 types: divisor = 3.0f)
     auto setFilter = [this](int index) {
@@ -322,6 +324,11 @@ ZFilterMiniEditor::ZFilterMiniEditor(ZFilterMiniProcessor& p)
     hpBtn.onClick = [setFilter]() { setFilter(1); };
     bpBtn.onClick = [setFilter]() { setFilter(2); };
     ntBtn.onClick = [setFilter]() { setFilter(3); };
+
+    freqSmoothBtn.onClick = [this]() {
+        auto* param = processorRef.apvts.getParameter("freqSmooth");
+        param->setValueNotifyingHost(param->getValue() < 0.5f ? 1.0f : 0.0f);
+    };
 
     // Parameter attachments
     frequencyAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
@@ -356,13 +363,14 @@ void ZFilterMiniEditor::updateDisplay()
     float input = *processorRef.apvts.getRawParameterValue("input");
     float poles = *processorRef.apvts.getRawParameterValue("poles");
     float mix = *processorRef.apvts.getRawParameterValue("mix");
+    bool freqSmooth = *processorRef.apvts.getRawParameterValue("freqSmooth") > 0.5f;
 
     // Row 0: "Z-FILTER" (8 chars exactly)
     lcd.setText(0, "Z-FILTER");
 
-    // Row 1: "MINI" + filter type abbreviation
+    // Row 1: "MINI" + filter type abbreviation + SM indicator
     const char* typeShort[] = { " LP", " HP", " BP", " NT" };
-    lcd.setText(1, "MINI" + juce::String(typeShort[juce::jlimit(0, 3, filterType)]));
+    lcd.setText(1, "MINI" + juce::String(typeShort[juce::jlimit(0, 3, filterType)]) + (freqSmooth ? " SM" : ""));
 
     // Row 2: F and I values (e.g. "F:50 I:50")
     lcd.setText(2, "F:" + juce::String((int)(freq * 100.0f)).paddedLeft(' ', 3) +
@@ -377,6 +385,7 @@ void ZFilterMiniEditor::updateDisplay()
     hpLED.setActive(filterType == 1);
     bpLED.setActive(filterType == 2);
     ntLED.setActive(filterType == 3);
+    freqSmoothLED.setActive(freqSmooth);
 
     repaint();
 }
@@ -394,7 +403,7 @@ void ZFilterMiniEditor::paint(juce::Graphics& g)
 
     const int labelY = 288;
     const int spacing = 60;
-    const int startX = 218;
+    const int startX = 168;      // shifted left 50px
     const int labelW = 50;
 
     // Frequency label (under big knob, centered on 15 + 150/2 = 90)
@@ -412,6 +421,7 @@ void ZFilterMiniEditor::paint(juce::Graphics& g)
     g.drawText("Poles", lx(5), labelY, labelW, 14, juce::Justification::centred);
     g.drawText("Level", lx(6), labelY, labelW, 14, juce::Justification::centred);
     g.drawText("Mix",   lx(7), labelY, labelW, 14, juce::Justification::centred);
+    g.drawText("Smth",  668, 260, 50, 14, juce::Justification::centredLeft);
 }
 
 void ZFilterMiniEditor::resized()
@@ -431,7 +441,7 @@ void ZFilterMiniEditor::resized()
     const int btnY = 256;        // top of buttons (vertically centered with knobs)
     const int ledY = 240;        // LEDs above buttons
     const int spacing = 60;      // uniform center-to-center spacing
-    const int startX = 218;      // center of first control (LP button)
+    const int startX = 168;      // center of first control (LP button) — shifted left 50px
 
     // Filter type buttons + LEDs
     auto btnCX = [&](int i) { return startX + i * spacing; };
@@ -453,4 +463,8 @@ void ZFilterMiniEditor::resized()
     polesKnob.setBounds(btnCX(5) - kS / 2, controlY, kS, kS);
     outputKnob.setBounds(btnCX(6) - kS / 2, controlY, kS, kS);
     mixKnob.setBounds(btnCX(7) - kS / 2, controlY, kS, kS);
+
+    // Freq Smooth button + LED (position 8)
+    freqSmoothBtn.setBounds(btnCX(8) - btnW / 2, btnY, btnW, btnH);
+    freqSmoothLED.setBounds(btnCX(8) - ledS / 2, ledY, ledS, ledS);
 }
