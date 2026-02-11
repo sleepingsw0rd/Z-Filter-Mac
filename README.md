@@ -25,8 +25,9 @@ Rescan in your DAW. All three versions can run side-by-side.
 
 ## Features
 
-- **5 Filter Types**: Lowpass, Highpass, Bandpass, Notch, Region Gate
+- **4 Filter Types**: Lowpass, Highpass, Bandpass, Notch
 - **Filter Morphing**: Smoothly blend between two filter types (A and B) with independent type selection
+- **Morph Smooth Modes**: Parameter-space smoothing (Sm2) and ARMAdillo smoothing (Sm3) for glitch-free morph transitions
 - **Cascaded Biquad Architecture**: Up to 4 cascaded filter stages (12-48 dB/octave) controlled by the Resonance knob
 - **LFO Modulation**: Tempo-syncable LFO with adjustable speed and depth, targeting Cutoff, Morph, or both
 - **Z-Output Stage**: Optional Airwindows output processing stage for analog character
@@ -35,7 +36,7 @@ Rescan in your DAW. All three versions can run side-by-side.
 - **Dot-Matrix LCD Display**: Real-time parameter readout in an HD44780-style display
 - **Dry/Wet Mix**: Blend filtered and dry signals
 - **Bypass**: Full signal bypass with LED indicator
-- **Per-Sample Coefficient Smoothing**: Click-free parameter automation
+- **Per-Sample Frequency Smoothing**: Click-free frequency automation (Sm1) for smooth cutoff changes
 
 ## Controls
 
@@ -45,10 +46,13 @@ Rescan in your DAW. All three versions can run side-by-side.
 | **Bypass** | Bypass all processing | On/Off |
 | **ZOut** | Enable Z-Output stage | On/Off |
 | **Morph** (enable) | Enable filter morphing between A and B types | On/Off |
-| **A>LP** (Flt A) | Filter A type selector | LP/HP/BP/NT/RG (cycles on click) |
+| **A>LP** (Flt A) | Filter A type selector | LP/HP/BP/NT (cycles on click) |
 | **Mrph** (knob) | Morph blend between Filter A and B | 0% to 100% |
-| **B>BP** (Flt B) | Filter B type selector | LP/HP/BP/NT/RG (cycles on click) |
-| **LP / HP / BP / NT / RG** | Quick-set Filter A type | Lowpass, Highpass, Bandpass, Notch, Region Gate |
+| **B>BP** (Flt B) | Filter B type selector | LP/HP/BP/NT (cycles on click) |
+| **Sm1** | Frequency smoothing | On/Off — per-sample cutoff smoothing for click-free automation |
+| **Sm2** | Parameter-space morph smoothing | On/Off — smooth morph in parameter space |
+| **Sm3** | ARMAdillo morph smoothing | On/Off — ARMA-based morph smoothing |
+| **LP / HP / BP / NT** | Quick-set Filter A type | Lowpass, Highpass, Bandpass, Notch |
 | **Spd** | LFO speed | 0.01 Hz to 20 Hz (free) or tempo-synced divisions |
 | **Dpt** | LFO depth | 0% to 100% |
 | **Sync** | LFO tempo sync | On/Off |
