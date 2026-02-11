@@ -50,7 +50,7 @@ public:
     //==============================================================================
     juce::AudioProcessorValueTreeState apvts;
 
-    enum FilterType { Lowpass = 0, Highpass, Bandpass, Notch, Region };
+    enum FilterType { Lowpass = 0, Highpass, Bandpass, Notch };
 
 private:
     juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
@@ -89,10 +89,6 @@ private:
     double fixA[fix_total] = {};
     double fixB[fix_total] = {};
 
-    // Second opamp/IIR state for Region crossfade
-    double fixA2[fix_total] = {};
-    double fixB2[fix_total] = {};
-
     // IIR state
     double iirSampleAL = 0.0;
     double iirSampleAR = 0.0;
@@ -116,6 +112,9 @@ private:
     // Per-filter poles smoothing
     double polesASmooth_A = 0.0, polesASmooth_B = 0.0;
     double polesBSmooth_A = 0.0, polesBSmooth_B = 0.0;
+
+    // Frequency smoothing state
+    double freqA = 0.5, freqB = 0.5;
 
     // Dither state
     uint32_t fpdL = 1, fpdR = 1;
