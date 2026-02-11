@@ -311,13 +311,15 @@ ZFilterEditor::ZFilterEditor(ZFilterProcessor& p)
     addBtn(hpBtn);
     addBtn(bpBtn);
     addBtn(ntBtn);
-    addBtn(rgBtn);
     addBtn(lfoSyncBtn);
     addBtn(zOutBtn);
     addBtn(morphEnableBtn);
     addBtn(filterABtn);
     addBtn(filterBBtn);
     addBtn(lfoTargetBtn);
+    addAndMakeVisible(smooth1Btn);
+    addAndMakeVisible(smooth2Btn);
+    addAndMakeVisible(smooth3Btn);
 
     // LEDs
     addAndMakeVisible(bypassLED);
@@ -325,7 +327,6 @@ ZFilterEditor::ZFilterEditor(ZFilterProcessor& p)
     addAndMakeVisible(hpLED);
     addAndMakeVisible(bpLED);
     addAndMakeVisible(ntLED);
-    addAndMakeVisible(rgLED);
     addAndMakeVisible(lfoSyncLED);
     addAndMakeVisible(zOutLED);
     addAndMakeVisible(morphEnableLED);
@@ -340,13 +341,12 @@ ZFilterEditor::ZFilterEditor(ZFilterProcessor& p)
     };
 
     auto setFilter = [this](int index) {
-        processorRef.apvts.getParameter("filterTypeA")->setValueNotifyingHost((float)index / 4.0f);
+        processorRef.apvts.getParameter("filterTypeA")->setValueNotifyingHost((float)index / 3.0f);
     };
     lpBtn.onClick = [setFilter]() { setFilter(0); };
     hpBtn.onClick = [setFilter]() { setFilter(1); };
     bpBtn.onClick = [setFilter]() { setFilter(2); };
     ntBtn.onClick = [setFilter]() { setFilter(3); };
-    rgBtn.onClick = [setFilter]() { setFilter(4); };
 
     zOutBtn.onClick = [this]() {
         auto* param = processorRef.apvts.getParameter("zOutputStage");
@@ -364,20 +364,20 @@ ZFilterEditor::ZFilterEditor(ZFilterProcessor& p)
         param->setValueNotifyingHost(param->getValue() < 0.5f ? 1.0f : 0.0f);
     };
 
-    // Filter A stepped selector (cycles through LP/HP/BP/NT/RG)
+    // Filter A stepped selector (cycles through LP/HP/BP/NT)
     filterABtn.onClick = [this]() {
         auto* param = processorRef.apvts.getParameter("filterTypeA");
-        int current = (int)(param->getValue() * 4.0f + 0.5f);
-        int next = (current + 1) % 5;
-        param->setValueNotifyingHost((float)next / 4.0f);
+        int current = (int)(param->getValue() * 3.0f + 0.5f);
+        int next = (current + 1) % 4;
+        param->setValueNotifyingHost((float)next / 3.0f);
     };
 
     // Filter B stepped selector
     filterBBtn.onClick = [this]() {
         auto* param = processorRef.apvts.getParameter("filterTypeB");
-        int current = (int)(param->getValue() * 4.0f + 0.5f);
-        int next = (current + 1) % 5;
-        param->setValueNotifyingHost((float)next / 4.0f);
+        int current = (int)(param->getValue() * 3.0f + 0.5f);
+        int next = (current + 1) % 4;
+        param->setValueNotifyingHost((float)next / 3.0f);
     };
 
     // LFO target 3-way toggle (Cutoff/Morph/Both)
@@ -386,6 +386,31 @@ ZFilterEditor::ZFilterEditor(ZFilterProcessor& p)
         int current = (int)(param->getValue() * 2.0f + 0.5f);
         int next = (current + 1) % 3;
         param->setValueNotifyingHost((float)next / 2.0f);
+    };
+
+    smooth1Btn.onClick = [this]() {
+        auto* param = processorRef.apvts.getParameter("freqSmooth");
+        param->setValueNotifyingHost(param->getValue() < 0.5f ? 1.0f : 0.0f);
+    };
+    smooth2Btn.onClick = [this]() {
+        auto* p2 = processorRef.apvts.getParameter("morphSmooth2");
+        auto* p3 = processorRef.apvts.getParameter("morphSmooth3");
+        if (p2->getValue() < 0.5f) {
+            p2->setValueNotifyingHost(1.0f);
+            p3->setValueNotifyingHost(0.0f);
+        } else {
+            p2->setValueNotifyingHost(0.0f);
+        }
+    };
+    smooth3Btn.onClick = [this]() {
+        auto* p2 = processorRef.apvts.getParameter("morphSmooth2");
+        auto* p3 = processorRef.apvts.getParameter("morphSmooth3");
+        if (p3->getValue() < 0.5f) {
+            p3->setValueNotifyingHost(1.0f);
+            p2->setValueNotifyingHost(0.0f);
+        } else {
+            p3->setValueNotifyingHost(0.0f);
+        }
     };
 
     // Parameter attachments
@@ -438,22 +463,31 @@ void ZFilterEditor::updateDisplay()
     float lfoSpd = *processorRef.apvts.getRawParameterValue("lfoSpeed");
     float lfoDpt = *processorRef.apvts.getRawParameterValue("lfoDepth");
     bool lfoSync = *processorRef.apvts.getRawParameterValue("lfoSync") > 0.5f;
+    bool freqSmooth = *processorRef.apvts.getRawParameterValue("freqSmooth") > 0.5f;
 
     // Filter type short names
-    const char* typeShort[] = { "LP", "HP", "BP", "NT", "RG" };
-    const char* typeNames[] = { "LOWPASS", "HIGHPASS", "BANDPASS", "NOTCH", "REGION" };
+    const char* typeShort[] = { "LP", "HP", "BP", "NT" };
+    const char* typeNames[] = { "LOWPASS", "HIGHPASS", "BANDPASS", "NOTCH" };
     const char* tgtNames[] = { "CUT", "MRP", "C+M" };
 
     juce::String row0, row1, row2, row3;
 
     if (morphOn) {
-        juce::String tA = (filterTypeA >= 0 && filterTypeA <= 4) ? typeShort[filterTypeA] : "LP";
-        juce::String tB = (filterTypeB >= 0 && filterTypeB <= 4) ? typeShort[filterTypeB] : "BP";
-        row0 = "Z-FILTER MORPH " + tA + ">" + tB + (zOut ? " ZOUT" : "");
+        juce::String tA = (filterTypeA >= 0 && filterTypeA <= 3) ? typeShort[filterTypeA] : "LP";
+        juce::String tB = (filterTypeB >= 0 && filterTypeB <= 3) ? typeShort[filterTypeB] : "BP";
+        row0 = "Z-FILTER MORPH " + tA + ">" + tB;
+        if (zOut) row0 += " ZOUT";
+        if (freqSmooth) row0 += " SM1";
+        if (*processorRef.apvts.getRawParameterValue("morphSmooth2") > 0.5f) row0 += " SM2";
+        if (*processorRef.apvts.getRawParameterValue("morphSmooth3") > 0.5f) row0 += " SM3";
         row2 = "MORPH:" + juce::String(morph * 100.0f, 0) + "% RES:" + juce::String(reso * 100.0f, 0) + "%";
     } else {
-        juce::String typeName = (filterTypeA >= 0 && filterTypeA <= 4) ? typeNames[filterTypeA] : "LOWPASS";
-        row0 = "Z-FILTER " + typeName + (zOut ? " ZOUT" : "");
+        juce::String typeName = (filterTypeA >= 0 && filterTypeA <= 3) ? typeNames[filterTypeA] : "LOWPASS";
+        row0 = "Z-FILTER " + typeName;
+        if (zOut) row0 += " ZOUT";
+        if (freqSmooth) row0 += " SM1";
+        if (*processorRef.apvts.getRawParameterValue("morphSmooth2") > 0.5f) row0 += " SM2";
+        if (*processorRef.apvts.getRawParameterValue("morphSmooth3") > 0.5f) row0 += " SM3";
         row2 = "IN:" + juce::String(input * 100.0f, 0) + "% RES:" + juce::String(reso * 100.0f, 0) + "%";
     }
 
@@ -493,13 +527,15 @@ void ZFilterEditor::updateDisplay()
     hpLED.setActive(filterTypeA == 1);
     bpLED.setActive(filterTypeA == 2);
     ntLED.setActive(filterTypeA == 3);
-    rgLED.setActive(filterTypeA == 4);
     lfoSyncLED.setActive(lfoSync);
     zOutLED.setActive(zOut);
     morphEnableLED.setActive(morphOn);
     filterALED.setActive(morphOn);
     filterBLED.setActive(morphOn);
     lfoTargetLED.setActive(lfoTgt > 0);
+    smooth1Btn.setActive(freqSmooth);
+    smooth2Btn.setActive(*processorRef.apvts.getRawParameterValue("morphSmooth2") > 0.5f);
+    smooth3Btn.setActive(*processorRef.apvts.getRawParameterValue("morphSmooth3") > 0.5f);
 
     repaint();
 }
@@ -518,36 +554,39 @@ void ZFilterEditor::paint(juce::Graphics& g)
     g.setFont(juce::Font(11.0f));
 
     // Dynamic labels for Flt A, Flt B, and Tgt
-    const char* typeShort[] = { "LP", "HP", "BP", "NT", "RG" };
+    const char* typeShort[] = { "LP", "HP", "BP", "NT" };
     const char* tgtNames[] = { "CUT", "MRP", "C+M" };
     int filterTypeA = (int)*processorRef.apvts.getRawParameterValue("filterTypeA");
     int filterTypeB = (int)*processorRef.apvts.getRawParameterValue("filterTypeB");
     int lfoTgt = (int)*processorRef.apvts.getRawParameterValue("lfoTarget");
 
-    juce::String fltALabel = "A>" + juce::String(typeShort[juce::jlimit(0, 4, filterTypeA)]);
-    juce::String fltBLabel = "B>" + juce::String(typeShort[juce::jlimit(0, 4, filterTypeB)]);
+    juce::String fltALabel = "A>" + juce::String(typeShort[juce::jlimit(0, 3, filterTypeA)]);
+    juce::String fltBLabel = "B>" + juce::String(typeShort[juce::jlimit(0, 3, filterTypeB)]);
     juce::String tgtLabel = juce::String("Tgt>") + tgtNames[juce::jlimit(0, 2, lfoTgt)];
 
     const int labelY = 253;
-    g.drawText("Bypass",   57, labelY, 50, 14, juce::Justification::centred);
-    g.drawText("ZOut",    114, labelY, 50, 14, juce::Justification::centred);
-    g.drawText("Morph",   171, labelY, 50, 14, juce::Justification::centred);
-    g.drawText(fltALabel,  228, labelY, 50, 14, juce::Justification::centred);
-    g.drawText("Mrph",    285, labelY, 50, 14, juce::Justification::centred);
-    g.drawText(fltBLabel,  342, labelY, 50, 14, juce::Justification::centred);
-    g.drawText("LP",      399, labelY, 50, 14, juce::Justification::centred);
-    g.drawText("HP",      456, labelY, 50, 14, juce::Justification::centred);
-    g.drawText("BP",      513, labelY, 50, 14, juce::Justification::centred);
-    g.drawText("NT",      570, labelY, 50, 14, juce::Justification::centred);
-    g.drawText("RG",      627, labelY, 50, 14, juce::Justification::centred);
-    g.drawText("Spd",     684, labelY, 50, 14, juce::Justification::centred);
-    g.drawText("Dpt",     741, labelY, 50, 14, juce::Justification::centred);
-    g.drawText("Sync",    798, labelY, 50, 14, juce::Justification::centred);
-    g.drawText(tgtLabel,   855, labelY, 50, 14, juce::Justification::centred);
-    g.drawText("Input",   912, labelY, 50, 14, juce::Justification::centred);
-    g.drawText("Poles",   969, labelY, 50, 14, juce::Justification::centred);
-    g.drawText("Level",  1026, labelY, 50, 14, juce::Justification::centred);
-    g.drawText("Mix",    1083, labelY, 50, 14, juce::Justification::centred);
+    g.drawText("Bypass",   52, labelY, 50, 14, juce::Justification::centred);
+    g.drawText("ZOut",    109, labelY, 50, 14, juce::Justification::centred);
+    g.drawText("Morph",   166, labelY, 50, 14, juce::Justification::centred);
+    g.drawText(fltALabel,  223, labelY, 50, 14, juce::Justification::centred);
+    g.drawText("Mrph",    280, labelY, 50, 14, juce::Justification::centred);
+    g.drawText(fltBLabel,  337, labelY, 50, 14, juce::Justification::centred);
+    g.drawText("LP",      394, labelY, 50, 14, juce::Justification::centred);
+    g.drawText("HP",      451, labelY, 50, 14, juce::Justification::centred);
+    g.drawText("BP",      508, labelY, 50, 14, juce::Justification::centred);
+    g.drawText("NT",      565, labelY, 50, 14, juce::Justification::centred);
+    g.drawText("Spd",     622, labelY, 50, 14, juce::Justification::centred);
+    g.drawText("Dpt",     679, labelY, 50, 14, juce::Justification::centred);
+    g.drawText("Sync",    736, labelY, 50, 14, juce::Justification::centred);
+    g.drawText(tgtLabel,   793, labelY, 50, 14, juce::Justification::centred);
+    g.drawText("Input",   850, labelY, 50, 14, juce::Justification::centred);
+    g.drawText("Poles",   907, labelY, 50, 14, juce::Justification::centred);
+    g.drawText("Level",   964, labelY, 50, 14, juce::Justification::centred);
+    g.drawText("Mix",    1021, labelY, 50, 14, juce::Justification::centred);
+    g.setFont(juce::Font(9.0f));
+    g.drawText("Sm1", 1115, 247, 30, 10, juce::Justification::centredLeft);
+    g.drawText("Sm2", 1115, 271, 30, 10, juce::Justification::centredLeft);
+    g.drawText("Sm3", 1115, 295, 30, 10, juce::Justification::centredLeft);
 }
 
 void ZFilterEditor::resized()
@@ -559,61 +598,64 @@ void ZFilterEditor::resized()
     frequencyKnob.setBounds(990, 18, 188, 188);
 
     // Control strip layout for 1200px width
-    // 19 controls at 57px center-to-center spacing, starting at center=82
-    // Centers: 82, 139, 196, 253, 310, 367, 424, 481, 538, 595, 652, 709, 766, 823, 880, 937, 994, 1051, 1108
+    // 19 controls at 57px center-to-center spacing, starting at center=77
+    // Centers: 77, 134, 191, 248, 305, 362, 419, 476, 533, 590, 647, 704, 761, 818, 875, 932, 989, 1046, 1103
     const int ledY  = 241;
     const int btnY  = 274;
     const int knobY = 267;
 
-    // Bypass (center=82)
-    bypassBtn.setBounds(62, btnY, 40, 24);
-    bypassLED.setBounds(77, ledY, 10, 10);
+    // Bypass (center=77)
+    bypassBtn.setBounds(57, btnY, 40, 24);
+    bypassLED.setBounds(72, ledY, 10, 10);
 
-    // ZOut (center=139)
-    zOutBtn.setBounds(119, btnY, 40, 24);
-    zOutLED.setBounds(134, ledY, 10, 10);
+    // ZOut (center=134)
+    zOutBtn.setBounds(114, btnY, 40, 24);
+    zOutLED.setBounds(129, ledY, 10, 10);
 
-    // Morph Enable (center=196)
-    morphEnableBtn.setBounds(176, btnY, 40, 24);
-    morphEnableLED.setBounds(191, ledY, 10, 10);
+    // Morph Enable (center=191)
+    morphEnableBtn.setBounds(171, btnY, 40, 24);
+    morphEnableLED.setBounds(186, ledY, 10, 10);
 
-    // Filter A stepped selector (center=253)
-    filterABtn.setBounds(233, btnY, 40, 24);
-    filterALED.setBounds(248, ledY, 10, 10);
+    // Filter A stepped selector (center=248)
+    filterABtn.setBounds(228, btnY, 40, 24);
+    filterALED.setBounds(243, ledY, 10, 10);
 
-    // Morph knob (center=310)
-    morphKnob.setBounds(291, knobY, 38, 38);
+    // Morph knob (center=305)
+    morphKnob.setBounds(286, knobY, 38, 38);
 
-    // Filter B stepped selector (center=367)
-    filterBBtn.setBounds(347, btnY, 40, 24);
-    filterBLED.setBounds(362, ledY, 10, 10);
+    // Filter B stepped selector (center=362)
+    filterBBtn.setBounds(342, btnY, 40, 24);
+    filterBLED.setBounds(357, ledY, 10, 10);
 
-    // Filter type buttons (LP/HP/BP/NT/RG) - quick-set for Filter A
-    lpBtn.setBounds(404, btnY, 40, 24);
-    hpBtn.setBounds(461, btnY, 40, 24);
-    bpBtn.setBounds(518, btnY, 40, 24);
-    ntBtn.setBounds(575, btnY, 40, 24);
-    rgBtn.setBounds(632, btnY, 40, 24);
+    // Filter type buttons (LP/HP/BP/NT) - quick-set for Filter A
+    lpBtn.setBounds(399, btnY, 40, 24);
+    hpBtn.setBounds(456, btnY, 40, 24);
+    bpBtn.setBounds(513, btnY, 40, 24);
+    ntBtn.setBounds(570, btnY, 40, 24);
 
-    lpLED.setBounds(419, ledY, 10, 10);
-    hpLED.setBounds(476, ledY, 10, 10);
-    bpLED.setBounds(533, ledY, 10, 10);
-    ntLED.setBounds(590, ledY, 10, 10);
-    rgLED.setBounds(647, ledY, 10, 10);
+    lpLED.setBounds(414, ledY, 10, 10);
+    hpLED.setBounds(471, ledY, 10, 10);
+    bpLED.setBounds(528, ledY, 10, 10);
+    ntLED.setBounds(585, ledY, 10, 10);
 
     // LFO controls
-    lfoSpeedKnob.setBounds(690, knobY, 38, 38);
-    lfoDepthKnob.setBounds(747, knobY, 38, 38);
-    lfoSyncBtn.setBounds(803, btnY, 40, 24);
-    lfoSyncLED.setBounds(818, ledY, 10, 10);
+    lfoSpeedKnob.setBounds(628, knobY, 38, 38);
+    lfoDepthKnob.setBounds(685, knobY, 38, 38);
+    lfoSyncBtn.setBounds(741, btnY, 40, 24);
+    lfoSyncLED.setBounds(756, ledY, 10, 10);
 
-    // LFO Target (center=880)
-    lfoTargetBtn.setBounds(860, btnY, 40, 24);
-    lfoTargetLED.setBounds(875, ledY, 10, 10);
+    // LFO Target (center=818)
+    lfoTargetBtn.setBounds(798, btnY, 40, 24);
+    lfoTargetLED.setBounds(813, ledY, 10, 10);
 
     // Parameter knobs
-    inputKnob.setBounds(918, knobY, 38, 38);
-    resonanceKnob.setBounds(975, knobY, 38, 38);
-    outputKnob.setBounds(1032, knobY, 38, 38);
-    mixKnob.setBounds(1089, knobY, 38, 38);
+    inputKnob.setBounds(856, knobY, 38, 38);
+    resonanceKnob.setBounds(913, knobY, 38, 38);
+    outputKnob.setBounds(970, knobY, 38, 38);
+    mixKnob.setBounds(1027, knobY, 38, 38);
+
+    // Smooth buttons (stacked vertically at x=1093, 20x20 each, 4px gap)
+    smooth1Btn.setBounds(1093, 242, 20, 20);
+    smooth2Btn.setBounds(1093, 266, 20, 20);
+    smooth3Btn.setBounds(1093, 290, 20, 20);
 }
